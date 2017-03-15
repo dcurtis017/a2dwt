@@ -1,0 +1,13 @@
+Chapter 3: Navigation
+
+You can split an application into one root module and one ore more feature modules. Feature modules can be loaded eagerly or lazily.
+
+To lazy load a module use the loadChildren property of in teh route configuration. You would then configure the path in the components to be empty.
+
+Routes are configured using RouterModule.
+
+You can select a location strategy to control how the url looks.
+
+The router outputs content into the <router-outlet> tags. There can be more than one router-outlet
+
+Use the routerLink property instead of the href attribute
