@@ -25,7 +25,7 @@ System.config({
         '@angular/platform-browser-dynamic': {main: 'platform-browser-dynamic.umd.min.js'}
     }
 });
-//map allows you to create an alias for amodule name
-//the map parameter is applie dbefore the baseURL
+//map allows you to create an alias for a module name
+//the map parameter is applied before the baseURL
 //a module can't span multiple files. A bundle is usually represented by a single file 
 //and contains multiple modules registered in it. 

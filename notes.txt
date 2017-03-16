@@ -1,3 +1,177 @@
+Chapter 2: Getting Started
+
+--> Modules
+An angular module is a container for a group of related components, services, directives...
+
+A module can be though of as a library of components and services that implements ceratin functionality from the business domain of your application such as a shipping or billing module.
+
+A small app may use one module (the root module) but a large app may have more than one module (one root many feature modules)
+
+All apps must have a root module that is bootstrapped on app launch 
+
+Modules are annotated with the NgModule decorator
+
+The root module must import BrowserModule, but if an app also has feature modules you will need to import CommonModule instead
+
+Members of all imported modules are available to all components of the modules
+
+To load and compile a module on app start up use: platformBrowserDynamic().bootstrapModule(AppModule)
+
+--> Components
+Each component consists of a view that defines the UI and a class that implements the logic behind the view
+
+Any angular app represents a hierarchy of components packaged in modules.
+
+An app must have at least 1 module and 1 component (the root component)
+
+Any component assigned to the boostrap prperty of the module becomes the root component
+
+Components use the decorator Components
+
+--> Directives
+
+Use the Diretive decorator and allow you to attach custom behavior to an HTML element
+
+Components are basically directives with views
+
+Ex:
+import {Directive, ElementRef, Renderer } from '@angular/core';
+
+@Directive({selector: '[highlight]'})
+export class HighlightDirective{
+    constructor(renderer: Renderer, el: ElementRef)
+    {
+        renderer.setElementStyle(el.nativeElement, 'backgroundColor', 'blue');
+    }
+}
+--would be used as: <h1 highlight>hello world</h1>
+
+All directives that are used in a module need to be added to the declaration property of the @NgModule decorator
+
+
+--> Data Binding
+
+Allows you to keep a component's properties in sync with th eview
+
+<h1>Hello {{ name }} </h1> -- curly braces are used to display a value in a template
+
+<span [hidden]="isValid">required</span> -- square brackets bind and html element's property to a value
+
+<button (click)="bid()">bid</button> -- parenthesis are used to bind an event handler for an element's event
+
+<input #title type="text"  />
+<span>{{ title.value }}</span> -- If you want to reference a DOM object's property within the template add a local template variable (the variable name must start with #) that will 
+automatically store a reference to the corresponding DOM object and use it via dot notation
+
+--> SystemJS Universal Module Loader
+
+Loading code w/ systemjs is an alternative to using a bunch of script tags
+
+--> an overview of module loaders
+
+Early es6 drafts included a global System objec that was responsible for loading modules into the execution environment. This was later removed 
+
+The es6 module loader polyfill offers one way to use the system object today.
+
+--> module loader vs script tags
+
+often the order of script tags matters
+
+Whenever you import a module into your code, the loader will match the odule name to a corresponding file, download it into the browser and execute ther est of the code.
+
+Modules keep projects organized because the module loader automatically assembles everything together in the browser before you launch the app, even loading dependencies
+
+The module loader can also be used to combine all modules into a single bundle
+
+--> Getting started with systemjs
+
+Two primary methods are System.import() and System.config()
+
+To load a module using System.import and the modules path or logical name that is mapped to the path
+
+If the module name starts with ./ it's a path to the file even if the extension is omitted. SystemJS first tries to match the module name against the configured mapping provided either 
+as an argument to the method System.config or in a file. If the mapping for the name isn't foudn ,it's considered to be a path to a file.
+
+
+The System.import method returns a promise object.  The then callback is invoked when teh module is loaded.
+
+An es6 module object contains a property for each exported value in teh loaded module
+
+--> Configuring SystemJS
+
+baseURL - all modules are loaded relative to this url unless the module name represents an absolute or realtive URL
+ex: 
+System.config({ baseURL: '/app' });
+System.import('es6module.js');   // GET /app/es6module.js
+System.import('./es6module.js'); // GET /es6module.js
+System.import('http://example.com/es6module.js'); // GET http://example.com/
+
+defaultJSExtensions - the .js extension will be added to all paths that don't end in .js. This is used to provide backward compatability
+
+map - allows you to create an alias for a module name. When you import a module, the module name is replaced with an associated value, unless the original module name represents any kind of path (absolute or relative)
+ex:
+System.config({ map: { 'es6module.js': 'esSixModule.js' } });
+System.import('es6module.js');   // GET /esSixModule.js
+System.import('./es6module.js'); // GET /es6Module.js
+
+ex:
+System.config({
+  baseURL: '/app',
+  map: { 'es6module': 'esSixModule.js' }
+});
+System.import('es6module'); // GET /app/esSixModule.js
+
+packages - provide a way to set metadata and a map configuration that's specific to a common path.
+ex:
+System.config({
+  packages: {
+    app: {
+      defaultExtension: "ts",
+      main: "main_router_sample"
+    }
+  }
+});
+System.import('app'); -- System.import('app') should load the module located in main_router_sample.ts
+
+paths - similar to map but supports wildcards. It's applied after map but before baseURL. You can use map and paths but only map is recognized by systemjs
+ex:
+System.config({
+  baseURL: '/app',
+  map: { 'es6module': 'esSixModule.js' },
+  paths: { '*': 'lib/*' }
+});
+
+System.import('es6module'); // GET /app/lib/esSixModule.js
+
+**If you see an exmaple with System.import('app') which opens a file with a different name it's because the map or packages property was confiugred. For example 
+import {Component} from '@angular/core'; the @angular refers to the name mapped to the actual directory where the Angular framework is locatd and core is a subdirectory
+and the main file in that subdirectory is specified in teh SystemJS config
+ex:
+packages: {
+        '@angular/core' : {main: 'index.js'}
+}
+
+transpiler - allows you to specify teh name of the transpiler module that shoudl be used when loading app modules. If a file doesn't contain at least 1 import or export statement
+it will not be transpiled. Valid options are typescript, traceur and babel
+
+typescriptOptions - allows you to set the Typescript compiler options
+
+--> Selecting a Package Manager
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Chapter 3: Navigation
 
 You can split an application into one root module and one ore more feature modules. Feature modules can be loaded eagerly or lazily.
