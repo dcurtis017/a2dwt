@@ -7,7 +7,7 @@ A module can be though of as a library of components and services that implement
 
 A small app may use one module (the root module) but a large app may have more than one module (one root many feature modules)
 
-All apps must have a root module that is bootstrapped on app launch 
+All apps must have a root module that is bootstrapped on app launch
 
 Modules are annotated with the NgModule decorator
 
@@ -60,7 +60,7 @@ Allows you to keep a component's properties in sync with th eview
 <button (click)="bid()">bid</button> -- parenthesis are used to bind an event handler for an element's event
 
 <input #title type="text"  />
-<span>{{ title.value }}</span> -- If you want to reference a DOM object's property within the template add a local template variable (the variable name must start with #) that will 
+<span>{{ title.value }}</span> -- If you want to reference a DOM object's property within the template add a local template variable (the variable name must start with #) that will
 automatically store a reference to the corresponding DOM object and use it via dot notation
 
 --> SystemJS Universal Module Loader
@@ -69,7 +69,7 @@ Loading code w/ systemjs is an alternative to using a bunch of script tags
 
 --> an overview of module loaders
 
-Early es6 drafts included a global System objec that was responsible for loading modules into the execution environment. This was later removed 
+Early es6 drafts included a global System objec that was responsible for loading modules into the execution environment. This was later removed
 
 The es6 module loader polyfill offers one way to use the system object today.
 
@@ -89,7 +89,7 @@ Two primary methods are System.import() and System.config()
 
 To load a module using System.import and the modules path or logical name that is mapped to the path
 
-If the module name starts with ./ it's a path to the file even if the extension is omitted. SystemJS first tries to match the module name against the configured mapping provided either 
+If the module name starts with ./ it's a path to the file even if the extension is omitted. SystemJS first tries to match the module name against the configured mapping provided either
 as an argument to the method System.config or in a file. If the mapping for the name isn't foudn ,it's considered to be a path to a file.
 
 
@@ -100,7 +100,7 @@ An es6 module object contains a property for each exported value in teh loaded m
 --> Configuring SystemJS
 
 baseURL - all modules are loaded relative to this url unless the module name represents an absolute or realtive URL
-ex: 
+ex:
 System.config({ baseURL: '/app' });
 System.import('es6module.js');   // GET /app/es6module.js
 System.import('./es6module.js'); // GET /es6module.js
@@ -143,7 +143,7 @@ System.config({
 
 System.import('es6module'); // GET /app/lib/esSixModule.js
 
-**If you see an exmaple with System.import('app') which opens a file with a different name it's because the map or packages property was confiugred. For example 
+**If you see an exmaple with System.import('app') which opens a file with a different name it's because the map or packages property was confiugred. For example
 import {Component} from '@angular/core'; the @angular refers to the name mapped to the actual directory where the Angular framework is locatd and core is a subdirectory
 and the main file in that subdirectory is specified in teh SystemJS config
 ex:
@@ -160,18 +160,6 @@ typescriptOptions - allows you to set the Typescript compiler options
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 Chapter 3: Navigation
 
 You can split an application into one root module and one ore more feature modules. Feature modules can be loaded eagerly or lazily.
@@ -185,3 +173,134 @@ You can select a location strategy to control how the url looks.
 The router outputs content into the <router-outlet> tags. There can be more than one router-outlet
 
 Use the routerLink property instead of the href attribute
+
+-> Routing Basics
+The router is responsible for managing client-side navigation.
+
+-> Location Strategies
+HashLocationStrategy - A hash sign is added to the url and the url segment after the hash idenfies the route to the used
+as a web page fragment. This will work in all browsers
+
+PathLocationStrategy - This history API based strategy is supported only in browsers that support html5. This is the default
+for angular
+
+The browser's history API allows you to move back and forth through the user's navigation history as welss as programatically
+manipulate history. The pushState() method is used to attache a segment to the baseURL as the user navigates your SPA
+
+You need to tell angular what to use as a base url by:
+ * Add the <base> tag to the header of index.html ex <base href = "/">
+ * Assign a value for the APP_BASE_HREF angular constant in the root module and use it as the providers value;
+ import { APP_BASE_HREF } from '@angular/common';
+...
+@NgModule({
+...
+  providers:[{provide: APP_BASE_HREF, useValue: '/'}]
+})
+class AppModule { }
+
+-> The building blocks of client-side navigation
+If your application needs routing you need to include the @angular/router dependency in packages.json
+so you can access the RouterModule module.
+
+The main players are:
+Router - an object that represents the router at runtime. You can use its navigate() and navigateByUrl() methods to navigate to a route
+either by the configured route path or by the url segment respectively
+RouterOutlet - a directive that serves as a placeholder within your web page (<router-outlet>)
+Routes - an array of routes that map urls to components rendered in the RouterOutlet
+RouterLInk - a directive for declaring a link to a route if the navigation is done using html anchor tags.
+ActivatedRoute - an object that represents the rotue or routes that are currently active
+
+Route configuration is done on the module level so you need to import routes int he @NgModule decorator. If you declare routes for the root modules,
+you should use the forRot() method. Ex:
+import { RouterModule, Routes } from '@angular/router';
+const routes: Routes = [{path:'', component: HomeComponent}];
+import { BrowserModule } from '@angular/platform-browser';
+import { RouterModule } from '@angular/router';
+...
+@NgModule({
+  imports: [ BrowserModule, RouterModule.forRoot(routes)],
+    ...
+})
+
+If you're configuring rotues for a feature module use forChild()
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+...
+@NgModule({
+  imports: [ CommonModule, RouterModule.forChild(routes)],
+    ...
+})
+
+You can store your routes in a separte file and export the routes constant;
+...
+export const routing = RouterModule.forRoot(routes);
+
+None of the components are aware of the router configuration because it's the module's business.
+
+To use hashlocationstrategy:
+providers:[{provide: LocationStrategy, useClass: HashLocationsStrategy}]
+
+You can define a route  using the wildcard path (**) if this is the last entry, it will show that component whenever the user goes to a route that does not match an entry
+
+-> Extracting parameters from routes
+You need to inject an ActivatedRoute into the constructor of your component. Values are stored in ActivatedRoute.snapshot.params which has an index for the name of the param
+Your path should have :{paramname} ex: product/:id
+You can then use the router link like: <a [routerLink]="['/product', 1234]">Details</a>
+
+-> Passing static data to a route
+Use the data property of your route configuration
+ex: {path: 'product/:id', component: ProductComponet, data: [{isProd:true}]}
+access it using route.snapshot.data[0]['isProd'];
+
+-> Child Routes
+An angular application is a tree of components that have parent-child relationships. Each component is well encapulated and you have full control over what you expose to the rest of the application.
+Any component can have its own styles that won't mix with parent styles. A component can also have its own dependency injectors. A child component can have its own routes,
+but all routes are configured outside of any component.
+
+Child components can have their own router-outlet
+
+To do this use the children property of the route ex:
+[ {path: '',            component: HomeComponent},
+  {path: 'product/:id', component: ProductDetailComponent,
+    children: [
+      {path: '', component: ProductDescriptionComponent},
+      {path: 'seller/:id', component: SellerInfoComponent}
+    ]}
+]
+
+**Child components don't need to be imported.
+**look up ShadowDOM
+
+-> Guarding Routes
+The router has hooks that give you more control over the nagiation to and from a route.
+If canActivte() of the guard returns true the user can navigate to a route.
+If canDeactivate() returns true the user can navigate away from the route.
+The canActivate and canDeactivate properties of Route take an array of classes that implement the appropriate interface and are called sequentially
+Guard classes should be declared in the module's providers
+
+**if you want to wait for some async data before navigating to a route use hte resolve property whle configuring the route. The router won't instantiate teh configured component until the function completes
+
+-> Using multiple router outlets
+In angular you can have auxilary outlets which are displayed at the same time as the primary one.
+
+To separate rendering you add another router-outlet and give it a name attribute <router-outlet name = "chat"></router-outlet>
+and specify the name of the outlet in the route.
+
+In the link specify which component will render to the primary and which to the auxilary:
+<a [routerLink] = "[{outlets: {primary: 'home', aux: 'chat'}}]">Open</a>
+
+To remove the named outlet with its' content give a null value
+<a [routerLink] = "[{outlets: {aux: null}}]">Close</a>
+
+If you want to navigate programatically use:
+navigate([{outlets: {aux: 'chat'}}])
+
+-> splitting the page into modules
+The root module is bootstrapped and the feature modules are imported.
+
+Each module can expose and hide certain functionality and all modules are executed in the same contextxt so they can share objects
+
+Feature modules should be placed in a separate directory
+
+-> Lazy Loading Modules
+To use lazy loading, in your route path use the loadChildren property and pass it the path to the module
