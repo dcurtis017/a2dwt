@@ -304,3 +304,70 @@ Feature modules should be placed in a separate directory
 
 -> Lazy Loading Modules
 To use lazy loading, in your route path use the loadChildren property and pass it the path to the module
+
+Chapter 4: Dependency Injection
+
+--> The dependency injection and inversion of control patterns
+
+DI: If object A depends on an object of type B, A won't explicitly instantiate object B (as with the new operator).
+B will be injected from the operational environment. A just needs to declare that it needs an object of type B.
+
+IoC: A more general pattern of DI. Rather than making your application use some API from a framework, the frameworkcreates and supplies
+the objects taht the application needs. IoC can be implemented in different ways and DI is one way.
+Angular plays the role of IoC container and can provide the required objects according to your component's declarations
+
+Benefits of DI:
+Loose coupling and reusability
+**In angualr you register objects for DI by specifying providres. A provider is an instruction to Angular about
+how to create an isntance of an object for future injection into a target component or directive. 
+A provider is an instruction to Angular about how to create an instance of an object for future injection into a
+target component or directive
+[ProduceService] is shorthand for [{provide: ProductService, useClass: ProductService}]
+
+Testability
+**DI lets you easily inject mock objects into your test code.
+
+
+--> Injectors and providers
+Each component can have an Injector instance capable of injecting objects or primative values into a component or service.
+Any angular application has a root injector available to all its modules. To let the injector know what to inject you specify teh provider
+An injector will inject the object or value specified in the provider into the constructor of a component.
+
+*Although eagerly loaded modules don't have their own injectors, a lazy-loaded module has its own sub-root injector that's a direct child of the application root injector.
+
+Providers allow you to map a custom type (or a token) to a concret implementation of the type. You can specify providers eitehr inside teh components @Component decorator or as the property of @NgModule
+
+*The providers line means: When you need to construct an object of this type, create an instance of the register class for injection
+
+*Using the provider in @Component allows you to assign a provider to a specific component and all of its subcomponents
+* Providers specified at the module level don't have to be redeclared at the component level
+ex:
+@NgModule({
+  imports: [BrowserModule],
+  providers: [NameService],
+  declarations: [App],
+  bootstrap: [App]
+})
+export class AppModule {}
+@Component({})
+class App {
+  constructor(NameService: NameService) {//we don't need another declaration of the provider
+    this.name = NameService.getName();
+  }
+}
+
+**With typescript and the compiler option emitDecoratorMetadata set to true you don't need any annotations in the constructor to do DI
+**Don't forget to import the class you are using as a provider if it's in another file
+ex: import {NameService} from 'name-service';
+The provider object has the following properties:
+provide - token or short name (can match the name of the class or factory)
+useClass - the name of the class you want to inject
+useFactory - the name of the factory or an arrow function. Can have optional argument with dependencies
+useValue - string value to inject (ex: a url)
+
+--> Injecting the Http service
+@NgModule must  mport HttpModule which defines Http providers. The class than needs http would then take and http object in its constructor
+
+*the imports property of @NgModule makes the public components, directives and pipes of whatever is imported visible to the compnent templates in AppModule
+*declarations are to make directives (including components and pipes) from teh current module available to other directives in teh current module
+
