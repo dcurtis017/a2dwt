@@ -363,11 +363,81 @@ The provider object has the following properties:
 provide - token or short name (can match the name of the class or factory)
 useClass - the name of the class you want to inject
 useFactory - the name of the factory or an arrow function. Can have optional argument with dependencies
-useValue - string value to inject (ex: a url)
+const IS_DEV_ENVIRONMENT: boolean = true;
+@Component({
+  selector: 'product2',
 
+  providers:[{
+    provide: ProductService,
+    useFactory: (isDev) => {
+      if (isDev){
+        return new MockProductService();
+      } else{
+        return new ProductService();
+      }
+    },
+    deps: ["IS_DEV_ENVIRONMENT"]}],
+
+  template: '{{product.title}}'
+})
+useValue - string value to inject (ex: a url)
+providers: [ProductService, {provide: "IS_DEV_ENVIRONMENT", useValue: true}]
 --> Injecting the Http service
 @NgModule must  mport HttpModule which defines Http providers. The class than needs http would then take and http object in its constructor
 
 *the imports property of @NgModule makes the public components, directives and pipes of whatever is imported visible to the compnent templates in AppModule
 *declarations are to make directives (including components and pipes) from teh current module available to other directives in teh current module
 
+@Injectable() lets Angular know that a class can be used with the dependency injector. @Injectable() is not strictly required if the class has other Angular decorators on it or does not have any dependencies. What is important is that any class that is going to be injected with Angular is decorated. However, best practice is to decorate injectables with @Injectable(), as it makes more sense to the reader.+
+
+@Inject() is a manual mechanism for letting Angular know that a parameter must be injected.
+ex:  constructor(@Inject(ChatWidget) private chatWidget) { }
+
+*Each component can override it's inherited providers declarations
+
+--> OpaqueToken
+using a hard coded string may case problems if more than one provider uses a string with the same value for different purposes
+
+Opaquetoken class is preferable to using strings as tokens.
+ex:
+import {Component, OpaqueToken, Inject, NgModule} from '@angular/core';
+import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { BrowserModule } from '@angular/platform-browser';
+
+export const BackendUrl  = new OpaqueToken('BackendUrl');
+
+@Component({
+  selector: 'app',
+  template: 'URL: {{url}}'
+})
+class AppComponent {
+  constructor(@Inject(BackendUrl) public url: string) {}
+}
+
+@NgModule({
+  imports:      [ BrowserModule],
+  declarations: [ AppComponent],
+  providers: [  {provide:BackendUrl, useValue: 'myQAserver.com'}],
+  bootstrap:    [ AppComponent ]
+})
+class AppModule { }
+
+platformBrowserDynamic().bootstrapModule(AppModule);
+
+Instead of injecting a vague string, you inject a concrete BACKEND_URL
+
+-> Injector Heiarchy
+When your code creates a component that requires a particular object to be injected, angualr looks for a provider of the requested object at the component level. If it's not found,
+angular searches the parent components all the way up to the module. An error is thrown if the object isn't found in the heirarchy
+
+Angular craetes an additional injector for a lazy loaded module. Providers declared in the @NgModule of a lazy loaded module are available in the module, but not the entire application
+
+If providers for the same token were specified for both parent and child components, and each of thse components
+had a constructor requesting an ojbect representing the token, two separate instances of such an object would be create: one for the parent and another for the child
+
+-> viewProviders
+
+If you want to ensure that an injectable service won't be visible to the component's children or other components,
+use the viewProviders property instead of providers. 
+
+Chapter 5: Bidings, observables and pipes
