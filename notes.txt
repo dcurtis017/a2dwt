@@ -388,6 +388,7 @@ providers: [ProductService, {provide: "IS_DEV_ENVIRONMENT", useValue: true}]
 *the imports property of @NgModule makes the public components, directives and pipes of whatever is imported visible to the compnent templates in AppModule
 *declarations are to make directives (including components and pipes) from teh current module available to other directives in teh current module
 
+*Imports is used to import supporting modules and declarations declare things that belong to the current module. Everything in the list of declarations knows about each other
 @Injectable() lets Angular know that a class can be used with the dependency injector. @Injectable() is not strictly required if the class has other Angular decorators on it or does not have any dependencies. What is important is that any class that is going to be injected with Angular is decorated. However, best practice is to decorate injectables with @Injectable(), as it makes more sense to the reader.+
 
 @Inject() is a manual mechanism for letting Angular know that a parameter must be injected.
