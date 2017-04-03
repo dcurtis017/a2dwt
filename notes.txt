@@ -458,3 +458,28 @@ If you want to ensure that an injectable service won't be visible to the compone
 use the viewProviders property instead of providers. 
 
 Chapter 5: Bidings, observables and pipes
+
+--> Data binding
+Angular 2 by default uses 1 way binding. One way could mean either applying data changes from the component's properties to the UI or binding UI events with the component's methods.
+
+<h1>Hellow {{name}}</h1>
+<span [hidden] = "isValid">mine</span>
+<button (click) = "placeBid()">bid</button>
+
+In templates both double curly braces in text and square brackets in html elements' attributes result in property binding. Argular binds the interpolated value to the textContent porperty of the DOM node. The text is constantly udpated as the value of the corresponding expression changes.
+
+Two way binding can cause slow performance in large applications because angularjs keeps a list of all data-binding expressions on the page and a browser event can result in checking the list of expressions over and over again until it ensures that everythign is in sync. During that process a single property can be updated multiple times.
+
+You can still use 2 way binding in angular 2.
+
+Binding to events:
+(<event name>)="<event function>"
+When the event specified in parenthesis is triggered, the expression in the double quites is reevaluated. If you want to analyze the properties of the event object add $even to the handler function. (input)="onInput($event)" The event in parenthesis is the target of the binding. You can bind functions to any standard DOM event.
+
+Binding to properties and attributes:
+Each HTML element is represented by a tag with attributes and the browser creates a DOM object with properties for each tag. The user sees the DOM objects on the screen as they're rendered by the browser.
+
+Consider <input type="text" value="John" required> The browser uses the preceeding string to create a node in teh DOM tree which is a javascript object of type htmlinputelement. Each DOM object has an API in the form of methods and properties. In this case input has the properties required, type and value. The browser will synchronize the rendered values with the values of the corresponding DOM object's properties regardless of the synchronization featuers offered by a particular framework.
+
+In angular property binding is denoted by enclosing the property name in squar brackets and assigning an expression (or class variable) to it.
+
