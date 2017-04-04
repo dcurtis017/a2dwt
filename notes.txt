@@ -78,6 +78,14 @@ Allows you to keep a component's properties in sync with th eview
 <input #title type="text"  />
 <span>{{ title.value }}</span> -- If you want to reference a DOM object's property within the template add a local template variable (the variable name must start with #) that will
 automatically store a reference to the corresponding DOM object and use it via dot notation
+ex:
+
+template:`<input #mySearchField (keyup)="onKey(mySearchField.value)">`
+...
+
+onKey(value: string) {
+  console.log("You have entered " + value);
+}
 
 --> SystemJS Universal Module Loader
 
@@ -481,5 +489,94 @@ Each HTML element is represented by a tag with attributes and the browser create
 
 Consider <input type="text" value="John" required> The browser uses the preceeding string to create a node in teh DOM tree which is a javascript object of type htmlinputelement. Each DOM object has an API in the form of methods and properties. In this case input has the properties required, type and value. The browser will synchronize the rendered values with the values of the corresponding DOM object's properties regardless of the synchronization featuers offered by a particular framework.
 
-In angular property binding is denoted by enclosing the property name in squar brackets and assigning an expression (or class variable) to it.
+In angular property binding is denoted by enclosing the property name in square brackets and assigning an expression (or class variable) to it.
 
+Property binding is used when:
+1. A component needs to reflect the state of the model in the view
+2. A parent component needs to update a property of its child
+
+Attributes (in the context of the html document not the dom object) bindings are rearely used, because the browser uses HMTL to build the DOM tree, after that it works mainly with properties of the DOM object. We might use attribute binding in some cases. For example, IE doesn't support the hidden attribute and it won't create a corresponding DOM attribute so if you want to toggel the visibility of a component using css styles then attribute binding will help. 
+
+Attribute binding is denoted with square brackets using the attr.: prefix ex: <input[attr.value] = "greeting">
+
+****Destructuring an Object****
+let a = {'danie': 1, 'curtis': 2};
+foo(a);//writes 1 to the console
+function foo({daniel}){console.log(daniel);}
+
+--> Binding in templates
+Angular offers the following structural directives: NgIf, NgSwitch and NgFor
+NgSwitch adds on element tot he DOM tree from a set of possible elements based on some condition. 
+NgIf can conditionally remove an element from the DOM
+*ngIf="flag" is the same as [ngIf] = "flag"
+
+--> Two Way data binding
+2 way binding can be used to keep the view and model in sync. 
+If you want two way binding do the following:
+<input [value] = "mypropety" (input) = "onInput($event)"> or the shorter <input [(ngModel)] = "myComponentProperty">
+
+--> Reactive programming and observables
+Reactive programming is event driven applications where an observable event stream is pushed to subscribers. The observer/observable pattern is a great fit for asynchronous processing. The observable streams can be canceled, can notify about the end of the stream, and thee data psuhed to the subscriber can be transformed on teh way from teh source to the subscriber by applying various operators (functions).
+
+Observables implement the push model of data processing. In contrast, the pull model is implemente4d by looping through an array by an Iterable or ES6 generator function.
+
+An observer is an object that handles a data stream pushed by an observable functions. Observables can be cold (start streamign when some code invokes a subscriber function on it) or hot (stream data even if there's no subscriber interested in the data).
+
+A script that subscribes to an observable provides the observer object that knows what to do with the stream elements ex: let mySub : Subscription = someObservable.subscribe(myObserver);
+
+To cancel a stream: mySubscription.unsubscribe();
+
+An observable is an object that streams elements from some data source (a socket, an array, UI Events) one element at a time. On observable knows how to:
+ 1. Emit the next element
+ 2. throw an error
+ 3. send a signal that the streamign is over (that the last element has been served)
+
+An observer provides up to three call backs:
+ 1. the function to handle the next element emitted by the observable
+ 2. the function to handle errors in the observable
+ 3. the function to be invoked when the stream of data finishes
+
+ * the subscribe method is like a sequence of then invocations: one invocation for each arriving data element
+ 
+:Example flow from observable to subscriber:
+The emitter (producer) creates and original stream of data (rectangles). The map operator transfers each rectanble into a triangle, which is given to a filter operator that filters out the stream to push only selected triangles to the subscriber.
+
+A stream of customer objects is mapped to another stream containing only the age of each customer. The first stream could be filtered to keep only customers under 50.
+
+Each operator accepts an observable object as an argument and returns an observable as well to allow for easy chaining.
+
+** The reduce method allows you to produce and aggregate value from an array's elements. The result of reduce is always a single value.
+
+A stream is a collection of data given to your application over time. In ES6 you can treat an array as a data collection an d iterate its elements one at a time.
+
+An observable object is a more advanced version of an iterator. Iterators use the pull model to retrieve data and observables push data to subscribers.
+
+
+Angular applications can handle standard DOM evetns and can create and emit (dispatch) custom events as well.
+
+A handler function for an event can be delcared with an optional $event parameter that contains a javascript object with properties describing the event.
+
+Angular allows you to treat events as observable streams of data happening over time instead of one time deals.
+
+By subscribing to a stream your code expressses an interest in receiving the stream's elements. During subscription, you specify the code to be invoked when the next element is emitted and optionally code for error processing and stream completion. Often you'll specify a number of chained operators and then invoke the subscribe method.
+
+:Example:
+this.searchInput.valueChanges.debounceTime(500).subscribe(stock => this.getStockQuoteFromServer(stock));
+//debounceTime waits 500milliseconds before emitting the next event
+the subscribe mthod creates the instance of Observer which in this case passes each value from the stream generated by the searchInput to the getStockQuoteFromServer method. Without the debounceTime method each keypress would be sent to the server
+**No matter how many operators you chain together none will be invoked on the stream until you invoke subscribe
+
+The first argument to subscribe contains a callback for handling data coming from the server. The second argument to subscribe is a callback that's invoked in the case of an error, the third argument is invoked after the stream is complete
+**The form control directive creates an observable from the input field event
+
+Use switchMap operator instead of subscribe when the function that handles data generated by observable can also return an observable. Then you use subscribe for the second observable
+Observable 1 -> switchMap(function) -> Observable 2 -> subscribe
+
+If Observable 1 pushes the new value but he function that craetes Observable 2 hasn't finshed yet it's killed. SwitchMap unsubscribes and resubscribes to Observable1 and starts handling the new value from this stream.
+
+--> Pipes
+A pipe is a template element that allows you to transform a value into a desired output. template: `<p>Your birthday is {{ birthday | date }}</p>`
+
+Some pipes such as date (ex: date: 'medium') require an input parameter
+
+You can create custom pipes by addin ghte @Pipe annotation to a class taht implements the PipeTransform interface. 
